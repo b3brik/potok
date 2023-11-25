@@ -1,0 +1,42 @@
+#include <stdio.h>
+#include <pthread.h>
+
+#define NUM_THREADS 4
+
+// Функция, которую будут выполнять потоки
+void *printHello(void *threadID) {
+    long tid = (long)threadID;
+    printf("Привет из потока %ld!\n", tid);
+    pthread_exit(NULL);
+}
+
+int main() {
+    pthread_t threads[NUM_THREADS];
+    int rc;
+    long t;
+
+    // Создание потоков
+    for (t = 0; t < NUM_THREADS; t++) {
+        printf("Создание потока %ld\n", t);
+        rc = pthread_create(&threads[t], NULL, printHello, (void *)t);
+
+        if (rc) {
+            printf("Ошибка; код возврата из pthread_create() %d\n", rc);
+            return -1;
+        }
+    }
+
+    // Ожидание завершения потоков
+    for (t = 0; t < NUM_THREADS; t++) {
+        rc = pthread_join(threads[t], NULL);
+
+        if (rc) {
+            printf("Ошибка; код возврата из pthread_join() %d\n", rc);
+            return -1;
+        }
+    }
+
+    printf("Все потоки завершились успешно.\n");
+
+    pthread_exit(NULL);
+}
